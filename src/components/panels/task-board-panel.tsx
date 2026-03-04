@@ -72,6 +72,23 @@ const priorityColors: Record<string, string> = {
   critical: 'border-red-500',
 }
 
+const statusLabel: Record<Task['status'], string> = {
+  inbox: 'Inbox',
+  assigned: 'Assigned',
+  in_progress: 'In Progress',
+  review: 'Review',
+  quality_review: 'Quality Review',
+  done: 'Done',
+}
+
+const priorityLabel: Record<Task['priority'], string> = {
+  low: 'Low',
+  medium: 'Medium',
+  high: 'High',
+  critical: 'Critical',
+  urgent: 'Urgent',
+}
+
 export function TaskBoardPanel() {
   const { tasks: storeTasks, setTasks: storeSetTasks, selectedTask, setSelectedTask } = useMissionControl()
   const router = useRouter()
@@ -387,7 +404,7 @@ export function TaskBoardPanel() {
                   draggable
                   role="button"
                   tabIndex={0}
-                  aria-label={`${task.title}, ${task.priority} priority, ${task.status}`}
+                  aria-label={`${task.title}, ${priorityLabel[task.priority]} priority, ${statusLabel[task.status]}`}
                   onDragStart={(e) => handleDragStart(e, task)}
                   onClick={() => {
                     setSelectedTask(task)
@@ -420,7 +437,7 @@ export function TaskBoardPanel() {
                         task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
                         'bg-green-500/20 text-green-400'
                       }`}>
-                        {task.priority}
+                        {priorityLabel[task.priority]}
                       </span>
                     </div>
                   </div>
@@ -730,11 +747,11 @@ function TaskDetailModal({
             <div id="tabpanel-details" role="tabpanel" aria-label="Details" className="grid grid-cols-2 gap-4 text-sm mt-4">
               <div>
                 <span className="text-muted-foreground">Status:</span>
-                <span className="text-foreground ml-2">{task.status}</span>
+                <span className="text-foreground ml-2">{statusLabel[task.status]}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Priority:</span>
-                <span className="text-foreground ml-2">{task.priority}</span>
+                <span className="text-foreground ml-2">{priorityLabel[task.priority]}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Assigned to:</span>
@@ -874,8 +891,8 @@ function TaskDetailModal({
                     onChange={(e) => setReviewStatus(e.target.value as 'approved' | 'rejected')}
                     className="bg-surface-1 text-foreground border border-border rounded-md px-2 py-1 text-xs"
                   >
-                    <option value="approved">approved</option>
-                    <option value="rejected">rejected</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                   <input
                     type="text"
