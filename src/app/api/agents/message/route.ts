@@ -41,10 +41,17 @@ export async function POST(request: NextRequest) {
       idempotencyKey: randomUUID(),
     }
 
-    await runOpenClaw(
-      ['gateway', 'call', 'chat.send', '--json', '--params', JSON.stringify(callParams)],
-      { timeoutMs: 10000 }
-    )
+    try {
+      await runOpenClaw(
+        ['gateway', 'call', 'chat.send', '--json', '--params', JSON.stringify(callParams)],
+        { timeoutMs: 10000 }
+      )
+    } catch (err: any) {
+      const out = String(err?.stdout || '')
+      if (!(out.includes('"status": "started"') || out.includes('"status":"started"'))) {
+        throw err
+      }
+    }
 
     db_helpers.createNotification(
       to,

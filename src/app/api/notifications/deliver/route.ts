@@ -127,6 +127,22 @@ export async function POST(request: NextRequest) {
               workspaceId
             );
           } catch (cmdError: any) {
+            const out = String(cmdError?.stdout || '')
+            // Gateway may occasionally return non-zero while still acknowledging async enqueue.
+            if (out.includes('"status": "started"') || out.includes('"status":"started"')) {
+              const now = Math.floor(Date.now() / 1000)
+              markDeliveredStmt.run(now, notification.id, workspaceId)
+              deliveredCount++
+              deliveryResults.push({
+                notification_id: notification.id,
+                recipient: notification.recipient,
+                session_key: notification.session_key,
+                delivered_at: now,
+                status: 'delivered_async_started',
+                stdout: out.substring(0, 200),
+              })
+              continue
+            }
             throw new Error(`Command failed: ${cmdError.message}`);
           }
         } else {
